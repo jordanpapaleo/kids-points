@@ -3,6 +3,7 @@ import multi from 'redux-multi'
 import thunk from 'redux-thunk'
 import ReduxPromise from 'redux-promise'
 import {persistState} from 'redux-devtools'
+// import {reactReduxFirebase, firebaseStateReducer} from 'react-redux-firebase'
 import DevTools from 'components/DevTools'
 import rootReducer from 'ducks/reducers'
 

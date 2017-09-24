@@ -3,17 +3,21 @@ import PropTypes from 'prop-types'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
 import {Kid, Transaction} from 'models'
+import {timePunch} from 'ducks/transactions.ducks'
 
 const mapStateToProps = state => ({
   transactions: state.transactions
 })
-const mapDispatchToProps = dispatch => (bindActionCreators({}, dispatch))
+const mapDispatchToProps = dispatch => (bindActionCreators({
+  timePunch
+}, dispatch))
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class KidBox extends Component {
   static propTypes = {
     kid: PropTypes.instanceOf(Kid),
-    transactions: PropTypes.arrayOf(PropTypes.instanceOf(Transaction))
+    transactions: PropTypes.arrayOf(PropTypes.instanceOf(Transaction)),
+    timePunch: PropTypes.func.isRequired
   }
 
   constructor (props) {
@@ -23,22 +27,30 @@ export default class KidBox extends Component {
       .filter(trans => props.kid.transactions.indexOf(trans.id) !== -1)
 
     const amounts = transactions.map((trans) => trans.amount)
-    console.log('amounts', amounts)
-
     const totalPoints = (amounts.length >= 1)
       ? amounts.reduce((a, b) => a + b)
       : 0
 
-    this.state = {
-      transactions,
-      totalPoints
-    }
+    this.state = {totalPoints}
+  }
 
-    console.log('this.state', this.state)
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.transactions !== this.props.transactions) {
+      const transactions = nextProps.transactions
+        .filter(trans => nextProps.kid.transactions.indexOf(trans.id) !== -1)
+
+      const amounts = transactions.map(trans => trans.amount)
+      const totalPoints = (amounts.length >= 1)
+        ? amounts.reduce((a, b) => a + b)
+        : 0
+
+      this.setState(() => ({totalPoints}))
+    }
   }
 
   handlePunchClock = () => {
-    console.log('handlePunchClock', Date.now())
+    console.log('handlePunchClock', new Date())
+    this.props.timePunch(this.props.kid.id)
   }
 
   handleAddPoints = () => {
